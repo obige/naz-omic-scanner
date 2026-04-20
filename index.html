@@ -4,10 +4,12 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Naz Omic Crypto Scanner</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--bg:#0d0d1a;--bg2:#13132b;--bg3:#1a1a35;--border:#2a2a55;--border2:#3a3a70;--text:#e0e0ff;--text2:#9090c0;--text3:#5a5a90;--green:#4ade80;--red:#f87171;--amber:#fbbf24;--teal:#2dd4bf;--blue:#60a5fa;--btn:#1e1e42;--btn-hover:#2a2a5a;--btn-on:#2a3880}
-body{background:var(--bg);color:var(--text);font-family:'Courier New',monospace;font-size:13px;min-height:100vh}
+body{background:var(--bg);color:var(--text);font-family:'JetBrains Mono','Fira Code','Cascadia Code','Consolas','Courier New',monospace;font-size:13px;min-height:100vh;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:optimizeLegibility}
 .header{background:var(--bg2);border-bottom:1px solid var(--border);padding:9px 16px;display:flex;align-items:center;gap:11px;flex-wrap:wrap}
 .logo{font-size:15px;font-weight:700;letter-spacing:1px}.logo span{color:var(--teal)}
 .dot{width:7px;height:7px;border-radius:50%;background:#22c55e;animation:blink 1.5s infinite}
@@ -52,8 +54,8 @@ th.sort{cursor:pointer;user-select:none}th.sort:hover{color:var(--text2)}
 tbody tr{border-bottom:1px solid rgba(255,255,255,.035);transition:background .08s}
 tbody tr:hover{background:var(--bg3)}
 tbody tr:nth-child(even){background:rgba(255,255,255,.015)}
-td{padding:6px 11px;font-size:12px;vertical-align:middle;white-space:nowrap}
-.sym{font-weight:700}.usdt{color:var(--text3);font-size:10px}
+td{padding:6px 11px;font-size:12.5px;vertical-align:middle;white-space:nowrap}
+.sym{font-weight:700;font-size:13px;letter-spacing:.3px}.usdt{color:var(--text3);font-size:10px}
 .buy{color:var(--green);font-weight:700}.sell{color:var(--red);font-weight:700}
 .bull{color:var(--green)}.bear{color:var(--red)}
 .rdy{color:var(--green);font-size:10px}
@@ -149,7 +151,7 @@ td{padding:6px 11px;font-size:12px;vertical-align:middle;white-space:nowrap}
 </div>
 <script>
 var WORKER='https://naz-omic-proxy.omicpaker.workers.dev';
-var USER_TOKEN='naz_obige_j2frgpx7n8mo5ephsr';
+var USER_TOKEN='';
 var BAPI=WORKER+'/api/v3';
 
 function wfetch(path){
@@ -210,15 +212,16 @@ function loadPairs(){
   setSt('Connecting to worker...');
   wfetch('/ping').then(function(ping){
     if(!ping){
-      setSt('Worker not responding');
+      setSt('Worker not responding - check token');
       setBadge('ERROR','b-err');
       allPairs=FALLBACK;
       document.getElementById('sPairs').textContent=allPairs.length+' (fallback)';
-      return;
+      return Promise.resolve(null);
     }
     setSt('Loading Binance USDT pairs...');
     return wfetch('/ticker/price');
   }).then(function(tickers){
+    if(tickers===null) return; // came from ping failure
     if(!tickers||!Array.isArray(tickers)){allPairs=FALLBACK;document.getElementById('sPairs').textContent=allPairs.length+' (fallback)';setSt('Using fallback list');return;}
     allPairs=tickers.map(function(t){return t.symbol;}).filter(function(s){
       return s.endsWith('USDT')&&
@@ -691,7 +694,7 @@ function sleep(ms){return new Promise(function(r){setTimeout(r,ms);});}
 
 function toggleSide(){
   var s=document.getElementById('side');
-  var btn=document.getElementById('sideToggle');
+  var btn=document.getElementById('sideBtn');
   s.classList.toggle('collapsed');
   btn.style.color=s.classList.contains('collapsed')?'var(--teal)':'var(--text2)';
 }
